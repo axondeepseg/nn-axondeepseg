@@ -11,6 +11,11 @@ import argparse
 import torch
 import cv2
 from pathlib import Path
+
+# setup dummy env variables so that nnUNet does not complain
+os.environ['nnUNet_raw'] = 'UNDEFINED'
+os.environ['nnUNet_results'] = 'UNDEFINED'
+os.environ['nnUNet_preprocessed'] = 'UNDEFINED'
 from nnunetv2.inference.predict_from_raw_data import nnUNetPredictor
 
 
@@ -29,15 +34,20 @@ def get_parser():
     parser.add_argument('--use-gpu', action='store_true', default=False,
                         help='Use GPU for inference. Default: False')
     return parser
+    
+def rescale_predictions(outpath, segtype):
+    predictions = Path(outpath).glob('*.png')
+    rescaling_factor = 255
+    if segtype == 'AM':
+        rescaling_factor = 127
+    
+    for pred in predictions:
+        img = cv2.imread(str(pred))
+        cv2.imwrite(str(pred), img*rescaling_factor)
 
 def main():
     parser = get_parser()
     args = parser.parse_args()
-
-    # setting up dummy env variables so that nnUNet does not complain
-    os.environ['nnUNet_raw'] = 'UNDEFINED'
-    os.environ['nnUNet_results'] = 'UNDEFINED'
-    os.environ['nnUNet_preprocessed'] = 'UNDEFINED'
 
     assert args.seg_type == 'AM' or args.seg_type == 'UM', 'Please select a valid segmentation type.'
 
@@ -63,6 +73,7 @@ def main():
         assert datapath.exists(), 'The specified path-dataset does not exist.'
 
         predictor.predict_from_files(args.path_dataset, args.path_out)
+        rescale_predictions(args.path_out, args.seg_type)
 
     elif args.path_images is not None:
         print('path-images not yet supported')
