@@ -14,6 +14,8 @@ import tempfile
 import shutil
 from pathlib import Path
 
+import download_models
+
 # setup dummy env variables so that nnUNet does not complain
 os.environ['nnUNet_raw'] = 'UNDEFINED'
 os.environ['nnUNet_results'] = 'UNDEFINED'
@@ -50,6 +52,9 @@ def rescale_predictions(outpath, segtype):
 def main():
     parser = get_parser()
     args = parser.parse_args()
+
+    if len(download_models.get_downloaded_models()) == 0:
+        print('No model downloaded. You might want to run the download_models.py script first.')
 
     assert args.seg_type == 'AM' or args.seg_type == 'UM', 'Please select a valid segmentation type.'
 
