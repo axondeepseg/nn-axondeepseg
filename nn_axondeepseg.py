@@ -6,8 +6,10 @@ The output can either be 1 class (unmyelinated axons only) or
 Authors: Armand Collin, Naga Karthik
 """
 
+import os
 import argparse
 import torch
+import cv2
 from pathlib import Path
 from nnunetv2.inference.predict_from_raw_data import nnUNetPredictor
 
@@ -32,6 +34,11 @@ def main():
     parser = get_parser()
     args = parser.parse_args()
 
+    # setting up dummy env variables so that nnUNet does not complain
+    os.environ['nnUNet_raw'] = 'UNDEFINED'
+    os.environ['nnUNet_results'] = 'UNDEFINED'
+    os.environ['nnUNet_preprocessed'] = 'UNDEFINED'
+
     assert args.seg_type == 'AM' or args.seg_type == 'UM', 'Please select a valid segmentation type.'
 
     if args.path_dataset is not None and args.path_images is not None:
@@ -55,6 +62,7 @@ def main():
         datapath = Path(args.path_dataset)
         assert datapath.exists(), 'The specified path-dataset does not exist.'
 
+        predictor.predict_from_files(args.path_dataset, args.path_out)
 
     elif args.path_images is not None:
         print('path-images not yet supported')
