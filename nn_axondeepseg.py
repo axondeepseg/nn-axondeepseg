@@ -10,6 +10,8 @@ import os
 import argparse
 import torch
 import cv2
+import tempfile
+import shutil
 from pathlib import Path
 
 # setup dummy env variables so that nnUNet does not complain
@@ -34,7 +36,7 @@ def get_parser():
     parser.add_argument('--use-gpu', action='store_true', default=False,
                         help='Use GPU for inference. Default: False')
     return parser
-    
+
 def rescale_predictions(outpath, segtype):
     predictions = Path(outpath).glob('*.png')
     rescaling_factor = 255
@@ -57,13 +59,13 @@ def main():
      # uses all the folds available in the model folder by default
     # folds_avail = [int(str(f).split('_')[-1]) for f in Path(args.path_model).glob('fold_*')]
     
-    # instantiate the nnUNetPredictor
+    # instantiate nnUNetPredictor
     predictor = nnUNetPredictor(
         perform_everything_on_gpu=True if args.use_gpu else False,
         device=torch.device('cuda', 0) if args.use_gpu else torch.device('cpu'),
     )
     print('Running inference on device: {}'.format(predictor.device))
-    # initializes the network architecture, loads the checkpoint
+    # initialize network architecture, load checkpoint
     predictor.initialize_from_trained_model_folder(args.path_model, use_folds=None)
     print('Model loaded successfully.')
 
@@ -72,8 +74,18 @@ def main():
         datapath = Path(args.path_dataset)
         assert datapath.exists(), 'The specified path-dataset does not exist.'
 
-        predictor.predict_from_files(args.path_dataset, args.path_out)
+        print('Creating temporary input directory.')
+        tmp_dir = Path('.') / 'tmp'
+        tmp_dir.mkdir(exist_ok=True)
+        for fname in Path(args.path_dataset).glob('*.png'):
+            target_fname = f'{fname.stem}_0000{fname.suffix}'
+            shutil.copyfile(str(fname), tmp_dir / target_fname)
+        predictor.predict_from_files(str(tmp_dir), args.path_out)
         rescale_predictions(args.path_out, args.seg_type)
+        print('Deleting temporary directory')
+        for fname in tmp_dir.glob('*'):
+            fname.unlink()
+        tmp_dir.rmdir()
 
     elif args.path_images is not None:
         print('path-images not yet supported')
