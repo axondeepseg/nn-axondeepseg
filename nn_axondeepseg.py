@@ -12,6 +12,8 @@ import torch
 import cv2
 import tempfile
 import shutil
+from tqdm import tqdm
+from loguru import logger
 from pathlib import Path
 
 import download_models
@@ -45,7 +47,7 @@ def rescale_predictions(outpath, segtype):
     if segtype == 'AM':
         rescaling_factor = 127
     
-    for pred in predictions:
+    for pred in tqdm(predictions):
         img = cv2.imread(str(pred))
         cv2.imwrite(str(pred), img*rescaling_factor)
 
@@ -57,13 +59,14 @@ def main():
     models = download_models.get_downloaded_models()
     if args.path_model == None:
         if len(models) == 0:
-            print('No model downloaded. Run the download_models.py script first.')
+            logger.error('No model downloaded. Run the download_models.py script first.')
             return 1
         elif len(models) == 1:
             path_model = models[0]
-            print(f'A single model was found: {path_model}. It will be used by default.')
+            logger.info(f'A single model was found: {path_model}. It will be used by default.')
         elif len(models) > 1:
-            print('Multiple models were found in the models/ folder. Please use the --path-model argument to disambiguate.')
+            logger.error('Multiple models were found in the models/ folder. Please use the --path-model argument to disambiguate.')
+            return 1
     else:
         path_model = args.path_model
 
@@ -80,31 +83,33 @@ def main():
         perform_everything_on_gpu=True if args.use_gpu else False,
         device=torch.device('cuda', 0) if args.use_gpu else torch.device('cpu'),
     )
-    print('Running inference on device: {}'.format(predictor.device))
+    logger.info('Running inference on device: {}'.format(predictor.device))
     # initialize network architecture, load checkpoint
     predictor.initialize_from_trained_model_folder(path_model, use_folds=None)
-    print('Model loaded successfully.')
+    logger.info('Model loaded successfully.')
 
 
     if args.path_dataset is not None:
         datapath = Path(args.path_dataset)
         assert datapath.exists(), 'The specified path-dataset does not exist.'
 
-        print('Creating temporary input directory.')
+        logger.info('Creating temporary input directory.')
         tmp_dir = Path('.') / 'tmp'
         tmp_dir.mkdir(exist_ok=True)
         for fname in Path(args.path_dataset).glob('*.png'):
             target_fname = f'{fname.stem}_0000{fname.suffix}'
             shutil.copyfile(str(fname), tmp_dir / target_fname)
         predictor.predict_from_files(str(tmp_dir), args.path_out)
+        logger.info('Rescaling predictions to 8-bit range.')
         rescale_predictions(args.path_out, args.seg_type)
-        print('Deleting temporary directory')
+
+        logger.info('Deleting temporary directory')
         for fname in tmp_dir.glob('*'):
             fname.unlink()
         tmp_dir.rmdir()
 
     elif args.path_images is not None:
-        print('path-images not yet supported')
+        logger.warning('path-images not yet supported')
 
 
 if __name__ == '__main__':

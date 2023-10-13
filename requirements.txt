@@ -1,3 +1,4 @@
 nnunetv2
 torch
 opencv-python
+loguru
