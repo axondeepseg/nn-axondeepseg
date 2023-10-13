@@ -33,7 +33,7 @@ def get_parser():
     parser.add_argument('--path-images', default=None, nargs='+', type=str,
                         help='List of images to segment. Use this argument only if you want to predict on a single image or list of invidiual images.')
     parser.add_argument('--path-out', help='Path to output directory.', required=True)
-    parser.add_argument('--path-model', required=True, 
+    parser.add_argument('--path-model', default=None,
                         help='Path to the model directory. This folder should contain individual folders like fold_0, fold_1, etc.',)
     parser.add_argument('--use-gpu', action='store_true', default=False,
                         help='Use GPU for inference. Default: False')
@@ -53,15 +53,26 @@ def main():
     parser = get_parser()
     args = parser.parse_args()
 
-    if len(download_models.get_downloaded_models()) == 0:
-        print('No model downloaded. You might want to run the download_models.py script first.')
+    # find available models
+    models = download_models.get_downloaded_models()
+    if args.path_model == None:
+        if len(models) == 0:
+            print('No model downloaded. Run the download_models.py script first.')
+            return 1
+        elif len(models) == 1:
+            path_model = models[0]
+            print(f'A single model was found: {path_model}. It will be used by default.')
+        elif len(models) > 1:
+            print('Multiple models were found in the models/ folder. Please use the --path-model argument to disambiguate.')
+    else:
+        path_model = args.path_model
 
     assert args.seg_type == 'AM' or args.seg_type == 'UM', 'Please select a valid segmentation type.'
 
     if args.path_dataset is not None and args.path_images is not None:
         raise ValueError('You can only specify either --path-dataset or --path-images (not both). See --help for more info.')
 
-     # uses all the folds available in the model folder by default
+     # find all available folds in the model folder
     # folds_avail = [int(str(f).split('_')[-1]) for f in Path(args.path_model).glob('fold_*')]
     
     # instantiate nnUNetPredictor
@@ -71,7 +82,7 @@ def main():
     )
     print('Running inference on device: {}'.format(predictor.device))
     # initialize network architecture, load checkpoint
-    predictor.initialize_from_trained_model_folder(args.path_model, use_folds=None)
+    predictor.initialize_from_trained_model_folder(path_model, use_folds=None)
     print('Model loaded successfully.')
 
 

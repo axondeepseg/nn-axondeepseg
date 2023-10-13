@@ -41,7 +41,6 @@ def download_data(url_data):
         session = requests.Session()
         session.mount('https://', HTTPAdapter(max_retries=retry))
         response = session.get(url_data, stream=True)
-        print(response)
 
         if "Content-Disposition" in response.headers:
             _, content = cgi.parse_header(response.headers['Content-Disposition'])
