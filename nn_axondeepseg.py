@@ -51,6 +51,11 @@ def rescale_predictions(outpath, segtype):
         img = cv2.imread(str(pred))
         cv2.imwrite(str(pred), img*rescaling_factor)
 
+def delete_dir(path_dir):
+    for f in path_dir.glob('*'):
+        f.unlink()
+    path_dir.rmdir()
+
 def main():
     parser = get_parser()
     args = parser.parse_args()
@@ -95,7 +100,11 @@ def main():
 
         logger.info('Creating temporary input directory.')
         tmp_dir = Path('.') / 'tmp'
-        tmp_dir.mkdir(exist_ok=True)
+        try:
+            tmp_dir.mkdir()
+        except FileExistsError:
+            delete_dir(tmpr_dir)
+            tmp_dir.mkdir()
         for fname in Path(args.path_dataset).glob('*.png'):
             target_fname = f'{fname.stem}_0000{fname.suffix}'
             shutil.copyfile(str(fname), tmp_dir / target_fname)
@@ -104,9 +113,7 @@ def main():
         rescale_predictions(args.path_out, args.seg_type)
 
         logger.info('Deleting temporary directory')
-        for fname in tmp_dir.glob('*'):
-            fname.unlink()
-        tmp_dir.rmdir()
+        delete_dir(tmp_dir)
 
     elif args.path_images is not None:
         logger.warning('path-images not yet supported')
