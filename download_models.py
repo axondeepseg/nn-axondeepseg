@@ -20,7 +20,7 @@ MODELS = {
         'contrasts': ['TEM'],
     },
     'model_seg_rabbit_axon-myelin_bf': {
-        'url': None,
+        'url': 'https://github.com/axondeepseg/model_seg_rabbit_axon-myelin_bf/releases/download/r20231017a/model-nn_seg_rabbit_axon-myelin_bf.zip',
         'description': 'Axon and myelin segmentation on Toluidine Blue stained BF images (rabbit)',
         'contrasts': ['BF'],
     },

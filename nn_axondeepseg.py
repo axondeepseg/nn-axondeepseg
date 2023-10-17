@@ -103,7 +103,7 @@ def main():
         try:
             tmp_dir.mkdir()
         except FileExistsError:
-            delete_dir(tmpr_dir)
+            delete_dir(tmp_dir)
             tmp_dir.mkdir()
         for fname in Path(args.path_dataset).glob('*.png'):
             target_fname = f'{fname.stem}_0000{fname.suffix}'
