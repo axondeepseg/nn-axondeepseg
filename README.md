@@ -9,7 +9,7 @@ pip install -r requirements.txt
 
 The inference tool should now be ready to use. First, download a model using the following command. The user will be prompted to specify which model to download.
 ```
-python download_model.py
+python download_models.py
 ```
 
 Then, you can use the `nn_axondeepseg.py` script to apply the model to your images. Assuming the images are in a folder called `input`, you can use 
