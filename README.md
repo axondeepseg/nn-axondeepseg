@@ -2,7 +2,7 @@
 1-class and 2-class segmentation of axon/myelin using nnunetv2 
 
 ### Usage
-Inside a virtual environment (pipenv, conda, etc.), install the requirements:
+First create a virtual environment (using pipenv, conda, etc.). Note that this project requires a python version >= 3.9 Then, install the requirements:
 ```
 pip install -r requirements.txt
 ```
