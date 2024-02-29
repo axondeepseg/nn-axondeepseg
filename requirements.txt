@@ -1,4 +1,4 @@
-nnunetv2>=2.2
+nnunetv2==2.2
 torch
 opencv-python
 loguru
