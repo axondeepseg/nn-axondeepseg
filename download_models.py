@@ -15,7 +15,7 @@ from requests.packages.urllib3.util import Retry
 
 MODELS = {
     'model_seg_unmyelinated_tem' : {
-        'url': 'https://github.com/axondeepseg/model_seg_unmyelinated_tem/releases/download/v1.0.0/model_seg_unmyelinated_tem.zip',
+        'url': 'https://github.com/axondeepseg/model_seg_unmyelinated_tem/releases/download/v1.1.0/model_seg_unmyelinated_tem.zip',
         'description': 'Unmyelinated axon segmentation (1-class)',
         'contrasts': ['TEM'],
     },
