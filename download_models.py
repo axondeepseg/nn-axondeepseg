@@ -14,8 +14,8 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util import Retry
 
 MODELS = {
-    'model_seg_unmyelinated_tem' : {
-        'url': 'https://github.com/axondeepseg/model_seg_unmyelinated_tem/releases/download/v1.0.0/model_seg_unmyelinated_tem.zip',
+    'model_seg_unmyelinated_sickkids_tem_best' : {
+        'url': 'https://github.com/axondeepseg/model_seg_unmyelinated_tem/releases/download/v1.1.0/model_seg_unmyelinated_sickkids_tem_best.zip',
         'description': 'Unmyelinated axon segmentation (1-class)',
         'contrasts': ['TEM'],
     },
@@ -24,6 +24,11 @@ MODELS = {
         'description': 'Axon and myelin segmentation on Toluidine Blue stained BF images (rabbit)',
         'contrasts': ['BF'],
     },
+    'model_myelin_cutter': {
+        'url': 'https://github.com/axondeepseg/model_postprocess_touching_myelin/releases/download/r20240313/model_myelin_cutter.zip',
+        'description': 'Postprocessing myelin cutter model to delineate touching myelin. To use directly on an axonmyelin segmentation mask.',
+        'contrasts': ['any'],
+    }
 }
 
 
