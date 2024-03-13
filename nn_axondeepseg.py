@@ -37,6 +37,8 @@ def get_parser():
     parser.add_argument('--path-out', help='Path to output directory.', required=True)
     parser.add_argument('--path-model', default=None,
                         help='Path to the model directory. This folder should contain individual folders like fold_0, fold_1, etc.',)
+    parser.add_argument('--use-best', action='store_true', default=False,
+                        help='Use the best checkpoints instead of the final ones. Default: False')
     parser.add_argument('--use-gpu', action='store_true', default=False,
                         help='Use GPU for inference. Default: False')
     return parser
@@ -90,7 +92,12 @@ def main():
     )
     logger.info('Running inference on device: {}'.format(predictor.device))
     # initialize network architecture, load checkpoint
-    predictor.initialize_from_trained_model_folder(path_model, use_folds=None)
+    checkpoint_name = 'checkpoint_final.pth' if not args.use_best else 'checkpoint_best.pth'
+    predictor.initialize_from_trained_model_folder(
+        path_model, 
+        use_folds=None,
+        checkpoint_name=checkpoint_name
+    )
     logger.info('Model loaded successfully.')
 
 
