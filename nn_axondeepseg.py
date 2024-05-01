@@ -41,6 +41,7 @@ def get_parser():
                         help='Use the best checkpoints instead of the final ones. Default: False')
     parser.add_argument('--use-gpu', action='store_true', default=False,
                         help='Use GPU for inference. Default: False')
+    parser.add_argument('--fold-all', action='store_true', default=False,)
     return parser
 
 def rescale_predictions(outpath, segtype):
@@ -83,7 +84,11 @@ def main():
         raise ValueError('You can only specify either --path-dataset or --path-images (not both). See --help for more info.')
 
      # find all available folds in the model folder
-    # folds_avail = [int(str(f).split('_')[-1]) for f in Path(args.path_model).glob('fold_*')]
+    if args.fold_all:
+        folds_avail = ['all']
+    else:
+        folds_avail = [int(str(f).split('_')[-1]) for f in Path(args.path_model).glob('fold_*')]
+
     
     # instantiate nnUNetPredictor
     predictor = nnUNetPredictor(
@@ -95,7 +100,7 @@ def main():
     checkpoint_name = 'checkpoint_final.pth' if not args.use_best else 'checkpoint_best.pth'
     predictor.initialize_from_trained_model_folder(
         path_model, 
-        use_folds=None,
+        use_folds=folds_avail,
         checkpoint_name=checkpoint_name
     )
     logger.info('Model loaded successfully.')
