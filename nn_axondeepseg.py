@@ -51,7 +51,7 @@ def rescale_predictions(outpath, segtype):
         rescaling_factor = 127
     
     for pred in tqdm(predictions):
-        img = cv2.imread(str(pred))
+        img = cv2.imread(str(pred), cv2.IMREAD_GRAYSCALE)
         cv2.imwrite(str(pred), img*rescaling_factor)
 
 def delete_dir(path_dir):
