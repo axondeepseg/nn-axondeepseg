@@ -1,3 +1,6 @@
+> [!WARNING]  
+> This repository is no longer maintained. Please install [AxonDeepSeg](github.com/axondeepseg/axondeepseg) v5 or higher instead.
+
 # nnAxonDeepSeg
 1-class and 2-class segmentation of axon/myelin using nnunetv2 
 
